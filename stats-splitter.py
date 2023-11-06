@@ -171,6 +171,13 @@ def write_from_dict_inner_contents_no_collated(bucket_sections, bucket_name):
     return
 
 
+def is_valid_file(parser1, arg):
+    if not os.path.exists(arg):
+        parser1.error("The file %s does not exist!" % arg)
+    else:
+        return arg
+
+
 # main method that is executed at runtime
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -190,6 +197,10 @@ if __name__ == '__main__':
                         action='store_true',
                         help='excludes the larger collated files from the buckets folders ' +
                              'and only has smaller bucket section files, can\'t be used with -s')
+    parser.add_argument("-f", '--stats-file',
+                        help='optional path of the stats.log file if this script is stored in a different location ' +
+                             'to the file',
+                        type=lambda x: is_valid_file(parser, x))
 
     args = parser.parse_args()
     if args.no_small & args.no_large:
@@ -197,6 +208,8 @@ if __name__ == '__main__':
         sys.exit(1)
     exclude_large = args.no_large
     exclude_small = args.no_small
+    if args.stats_file is not None:
+        stats_file = args.stats_file
     verbose = args.verbose
     mkdir(
         os.path.join(bucket_stats_folder_path)
